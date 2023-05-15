@@ -72,11 +72,12 @@ export class RegisterPetUseCase {
     })
 
     if (requirements_adopted) {
-      requirements_adopted.map((requirement_adopted) =>
-        this.requirementAdoptedRepository.create({
-          description: requirement_adopted,
-          pet_id: pet.id,
-        }),
+      requirements_adopted.map(
+        async (requirement_adopted) =>
+          await this.requirementAdoptedRepository.create({
+            description: requirement_adopted,
+            pet_id: pet.id,
+          }),
       )
     }
 
