@@ -3,7 +3,6 @@ import { RegisterPetUseCase } from './register-pet'
 
 import { describe, beforeEach, it, expect } from 'vitest'
 import { InMemoryOrgRepository } from '@/repositories/in-memory/in-memory-org-repository'
-import { hash } from 'bcryptjs'
 import { ResourceNotFoundError } from '@/errors/resource-not-found-error'
 import { InMemoryRequirementAdopted } from '@/repositories/in-memory/in-memory-requirement-adopted-repository'
 
@@ -15,25 +14,28 @@ let sut: RegisterPetUseCase
 
 describe('Register a new Pet', () => {
   beforeEach(() => {
-    inMemoryPetRepository = new InMemoryPetRepository()
     inMemoryOrgRepository = new InMemoryOrgRepository()
     inMemoryRequirementAdopted = new InMemoryRequirementAdopted()
-
-    sut = new RegisterPetUseCase(
-      inMemoryPetRepository,
+    inMemoryPetRepository = new InMemoryPetRepository(
       inMemoryOrgRepository,
       inMemoryRequirementAdopted,
     )
+
+    sut = new RegisterPetUseCase(inMemoryPetRepository, inMemoryOrgRepository)
   })
 
   it('should be able to register a new pet', async () => {
     const org = await inMemoryOrgRepository.create({
-      responsible: 'Fagner',
-      email: 'fagner@email.com',
+      name: 'John Doe',
+      email: 'johndoe@email.com',
       whatsapp: '999999999',
-      address: 'Rua oito, 19, Centro, Couto de Magalhães',
-      cep: '39188000',
-      password_hash: await hash('123456', 6),
+      cep: '47802-028',
+      password_hash: '123456',
+      street: 'Oito',
+      number: '19',
+      neighborhood: 'Centro',
+      city: 'Couto de Magalhães',
+      state: 'MG',
     })
 
     const { pet } = await sut.execute({
@@ -45,11 +47,6 @@ describe('Register a new Pet', () => {
       energy_level: 'High',
       level_of_independency: 'Medium',
       ambiente: 'Ambiente amplo',
-      street: 'Rua oito',
-      number: '19',
-      neighborhood: 'Centro',
-      city: 'Couto de Magalhães',
-      state: 'Minas Gerais',
       org_id: org.id,
     })
 
@@ -67,23 +64,22 @@ describe('Register a new Pet', () => {
         energy_level: 'High',
         level_of_independency: 'Medium',
         ambiente: 'Ambiente amplo',
-        street: 'Rua oito',
-        number: '19',
-        neighborhood: 'Centro',
-        city: 'Couto de Magalhães',
-        state: 'Minas Gerais',
         org_id: '123',
       })
     }).rejects.toBeInstanceOf(ResourceNotFoundError)
   })
   it('should not be able to register a new pet with requirement adopteds', async () => {
     const org = await inMemoryOrgRepository.create({
-      responsible: 'Fagner',
-      email: 'fagner@email.com',
+      name: 'John Doe',
+      email: 'johndoe@email.com',
       whatsapp: '999999999',
-      address: 'Rua oito, 19, Centro, Couto de Magalhães',
-      cep: '39188000',
-      password_hash: await hash('123456', 6),
+      cep: '47802-028',
+      password_hash: '123456',
+      street: 'Oito',
+      number: '19',
+      neighborhood: 'Centro',
+      city: 'Couto de Magalhães',
+      state: 'MG',
     })
 
     const { pet } = await sut.execute({
@@ -95,15 +91,30 @@ describe('Register a new Pet', () => {
       energy_level: 'High',
       level_of_independency: 'Medium',
       ambiente: 'Ambiente amplo',
-      street: 'Rua oito',
-      number: '19',
-      neighborhood: 'Centro',
-      city: 'Couto de Magalhães',
-      state: 'Minas Gerais',
       org_id: org.id,
-      requirements_adopted: ['Casa grande', 'Veterinario', 'Ração expecial'],
     })
 
-    console.log(pet)
+    await inMemoryRequirementAdopted.create({
+      pet_id: pet.id,
+      description: 'Casa grande',
+    })
+    await inMemoryRequirementAdopted.create({
+      pet_id: pet.id,
+      description: 'Veterinario',
+    })
+    await inMemoryRequirementAdopted.create({
+      pet_id: pet.id,
+      description: 'Ração expecial',
+    })
+
+    const requirements = await inMemoryRequirementAdopted.findManyById(pet.id)
+
+    expect(requirements).toEqual([
+      expect.objectContaining({ description: 'Casa grande' }),
+      expect.objectContaining({ description: 'Veterinario' }),
+      expect.objectContaining({
+        description: 'Ração expecial',
+      }),
+    ])
   })
 })

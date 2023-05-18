@@ -20,4 +20,12 @@ export class InMemoryRequirementAdopted
 
     return requirements
   }
+
+  async findManyById(pet_id: string): Promise<RequirementsAdopted[]> {
+    const requirements = await this.requirementsAdopted.filter(
+      (requirement) => requirement.pet_id === pet_id,
+    )
+
+    return requirements
+  }
 }

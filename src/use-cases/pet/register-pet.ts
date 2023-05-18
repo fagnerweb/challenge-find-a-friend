@@ -1,7 +1,6 @@
 import { ResourceNotFoundError } from '@/errors/resource-not-found-error'
 import { OrgRepository } from '@/repositories/org-repository'
 import { PetRepository } from '@/repositories/pet-repository'
-import { RequirementsAdotedRepository } from '@/repositories/requirements-adopted-repository'
 import { Pet } from '@prisma/client'
 
 interface RegisterPetUseCaseRequest {
@@ -14,11 +13,6 @@ interface RegisterPetUseCaseRequest {
   ambiente: string
   petPhotos?: string[]
   requirements_adopted?: string[]
-  street: string
-  number: string
-  neighborhood: string
-  city: string
-  state: string
   org_id: string
 }
 
@@ -29,8 +23,7 @@ interface RegisterPetUseCaseResponse {
 export class RegisterPetUseCase {
   constructor(
     private petsRepository: PetRepository,
-    private orgRepository: OrgRepository,
-    private requirementAdoptedRepository: RequirementsAdotedRepository,
+    private orgsRepository: OrgRepository,
   ) {}
 
   async execute({
@@ -41,17 +34,11 @@ export class RegisterPetUseCase {
     carry,
     energy_level,
     level_of_independency,
-    street,
-    number,
-    neighborhood,
-    city,
-    state,
     org_id,
-    requirements_adopted,
   }: RegisterPetUseCaseRequest): Promise<RegisterPetUseCaseResponse> {
-    const orgExists = await this.orgRepository.findById(org_id)
+    const orgNotFound = await this.orgsRepository.findById(org_id)
 
-    if (!orgExists) {
+    if (!orgNotFound) {
       throw new ResourceNotFoundError()
     }
 
@@ -63,23 +50,8 @@ export class RegisterPetUseCase {
       energy_level,
       level_of_independency,
       ambiente,
-      street,
-      number,
-      neighborhood,
-      city,
-      state,
       org_id,
     })
-
-    if (requirements_adopted) {
-      requirements_adopted.map(
-        async (requirement_adopted) =>
-          await this.requirementAdoptedRepository.create({
-            description: requirement_adopted,
-            pet_id: pet.id,
-          }),
-      )
-    }
 
     return { pet }
   }

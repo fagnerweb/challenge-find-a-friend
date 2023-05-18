@@ -3,17 +3,33 @@ import { describe, beforeEach, it, expect } from 'vitest'
 import { GetPetUseCase } from './get-pet'
 import { randomUUID } from 'crypto'
 import { ResourceNotFoundError } from '@/errors/resource-not-found-error'
+import { InMemoryOrgRepository } from '@/repositories/in-memory/in-memory-org-repository'
 
 describe('Get a Pet', () => {
   let inMemoryPetRepository: InMemoryPetRepository
+  let inMemoryOrgRepository: InMemoryOrgRepository
   let sut: GetPetUseCase
 
   beforeEach(() => {
-    inMemoryPetRepository = new InMemoryPetRepository()
+    inMemoryOrgRepository = new InMemoryOrgRepository()
+    inMemoryPetRepository = new InMemoryPetRepository(inMemoryOrgRepository)
     sut = new GetPetUseCase(inMemoryPetRepository)
   })
 
   it('should be able to get a pet by id', async () => {
+    const org = await inMemoryOrgRepository.create({
+      name: 'John Doe',
+      email: 'johndoe@email.com',
+      whatsapp: '999999999',
+      cep: '47802-028',
+      password_hash: '123456',
+      street: 'Oito',
+      number: '19',
+      neighborhood: 'Centro',
+      city: 'Couto de Magalhães',
+      state: 'MG',
+    })
+
     const petInMemory = (inMemoryPetRepository.pets = [
       {
         id: randomUUID(),
@@ -25,13 +41,8 @@ describe('Get a Pet', () => {
         energy_level: 'High',
         level_of_independency: 'Medium',
         ambiente: 'Ambiente amplo',
-        street: 'Rua oito',
-        number: '19',
-        neighborhood: 'Centro',
-        city: 'Couto de Magalhães',
-        state: 'Minas Gerais',
         created_at: new Date(),
-        org_id: '123',
+        org_id: org.id,
       },
     ])[0]
 

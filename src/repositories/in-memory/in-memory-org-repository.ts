@@ -7,21 +7,29 @@ export class InMemoryOrgRepository implements OrgRepository {
 
   async create({
     id,
-    responsible,
+    name,
     email,
     whatsapp,
-    address,
     cep,
     password_hash,
+    street,
+    number,
+    neighborhood,
+    city,
+    state,
   }: Prisma.OrgCreateInput): Promise<Org> {
     const newOrg = {
       id: id || randomUUID(),
-      responsible,
+      name,
       email,
       whatsapp,
-      address,
       cep,
       password_hash,
+      street,
+      number,
+      neighborhood,
+      city,
+      state,
       created_at: new Date(),
     }
 
@@ -44,5 +52,10 @@ export class InMemoryOrgRepository implements OrgRepository {
     if (!org) return null
 
     return org
+  }
+
+  async findManyByCity(city: string): Promise<Org[]> {
+    const orgs = this.org.filter((org) => org.city === city)
+    return orgs
   }
 }

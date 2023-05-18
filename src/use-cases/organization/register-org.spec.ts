@@ -1,6 +1,6 @@
 import { InMemoryOrgRepository } from '@/repositories/in-memory/in-memory-org-repository'
 import { beforeEach, describe, it, expect } from 'vitest'
-import { CreateOrgUseCase } from './create-org'
+import { CreateOrgUseCase } from './register-org'
 import { OrgAlreadyExists } from '@/errors/org-already-exists-error'
 import { PasswordLessThenSixCaracters } from '@/errors/password-less-then-six-caracters-error'
 

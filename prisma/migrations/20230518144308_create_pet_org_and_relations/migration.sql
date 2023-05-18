@@ -17,11 +17,6 @@ CREATE TABLE "pets" (
     "energy_level" "EnergyLevel" NOT NULL,
     "level_of_independency" "LevelOfIndependency" NOT NULL,
     "ambiente" TEXT NOT NULL,
-    "street" TEXT NOT NULL,
-    "number" TEXT NOT NULL,
-    "neighborhood" TEXT NOT NULL,
-    "city" TEXT NOT NULL,
-    "state" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "org_id" TEXT NOT NULL,
 
@@ -49,12 +44,17 @@ CREATE TABLE "requirements_adopted" (
 -- CreateTable
 CREATE TABLE "orgs" (
     "id" TEXT NOT NULL,
-    "responsible" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "cep" TEXT NOT NULL,
     "address" TEXT NOT NULL,
     "whatsapp" TEXT NOT NULL,
     "password_hash" TEXT NOT NULL,
+    "street" TEXT NOT NULL,
+    "number" TEXT NOT NULL,
+    "neighborhood" TEXT NOT NULL,
+    "city" TEXT NOT NULL,
+    "state" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "orgs_pkey" PRIMARY KEY ("id")

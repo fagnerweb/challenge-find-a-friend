@@ -1,7 +1,7 @@
 import { InMemoryOrgRepository } from '@/repositories/in-memory/in-memory-org-repository'
 import { describe, it, beforeEach, expect } from 'vitest'
 import { AuthenticateUseCase } from './authenticate-org'
-import { CreateOrgUseCase } from './create-org'
+import { CreateOrgUseCase } from './register-org'
 import { EmailOrPasswordWrong } from '@/errors/email-or-passoword-wrong'
 
 let inMemoryOrgRepository: InMemoryOrgRepository

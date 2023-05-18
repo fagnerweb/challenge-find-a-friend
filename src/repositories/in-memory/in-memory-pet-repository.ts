@@ -1,10 +1,23 @@
-import { Pet, Prisma } from '@prisma/client'
+import { Pet, Prisma, RequirementsAdopted } from '@prisma/client'
 import { PetRepository } from '../pet-repository'
 import { randomUUID } from 'node:crypto'
-import { SearchPetQuery } from '@/use-cases/search-pet'
+import { SearchPetQuery } from '@/use-cases/pet/search-pet'
+import { OrgRepository } from '../org-repository'
+// import { AddressRepository } from '../address-repository'
+import { RequirementsAdotedRepository } from '../requirements-adopted-repository'
 
 export class InMemoryPetRepository implements PetRepository {
   pets: Pet[] = []
+  orgRepository: OrgRepository
+  requirementAdoptedRepository: RequirementsAdotedRepository
+
+  constructor(
+    orgRepository: OrgRepository,
+    requirementAdoptedRepository: RequirementsAdotedRepository,
+  ) {
+    this.orgRepository = orgRepository
+    this.requirementAdoptedRepository = requirementAdoptedRepository
+  }
 
   async create({
     id,
@@ -15,11 +28,6 @@ export class InMemoryPetRepository implements PetRepository {
     carry,
     energy_level,
     level_of_independency,
-    street,
-    number,
-    neighborhood,
-    city,
-    state,
     org_id,
   }: Prisma.PetUncheckedCreateInput): Promise<Pet> {
     const pet = {
@@ -31,11 +39,6 @@ export class InMemoryPetRepository implements PetRepository {
       carry,
       energy_level,
       level_of_independency,
-      street,
-      number,
-      neighborhood,
-      city,
-      state,
       created_at: new Date(),
       org_id,
     }
@@ -54,13 +57,26 @@ export class InMemoryPetRepository implements PetRepository {
   }
 
   async fetchPetByCity(city: string): Promise<Pet[]> {
-    return this.pets.filter((pet) => pet.city === city)
+    const orgs = await this.orgRepository.findManyByCity(city)
+
+    const petsByOrgsInCity = this.pets.filter((pet) => {
+      return orgs.find((org) => org.id === pet.org_id)
+    })
+
+    return petsByOrgsInCity
+  }
+
+  async fetchRequirementsAdopted(
+    pet_id: string,
+  ): Promise<RequirementsAdopted[]> {
+    const requirementsAdopted =
+      await this.requirementAdoptedRepository.findManyById(pet_id)
+    return requirementsAdopted
   }
 
   async searchMany(search: SearchPetQuery, page: number): Promise<Pet[]> {
-    let petsFiltered = this.pets
-      .filter((pet) => pet.city === search.city)
-      .slice((page - 1) * 20, page * 20)
+    let petsFiltered = await this.fetchPetByCity(search.city)
+    petsFiltered.slice((page - 1) * 20, page * 20)
 
     if (search.age) {
       petsFiltered = petsFiltered.filter((pet) => pet.age === search.age)

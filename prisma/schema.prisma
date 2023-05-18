@@ -39,18 +39,14 @@ model Pet {
   energy_level          EnergyLevel
   level_of_independency LevelOfIndependency
   ambiente              String
-  street                String
-  number                String
-  neighborhood          String
-  city                  String
-  state                 String
   created_at            DateTime            @default(now())
 
-  petPhotos           PetPhotos[]
-  requirementsAdopted RequirementsAdopted[]
+  petPhotos PetPhotos[]
 
   org    Org    @relation(fields: [org_id], references: [id])
   org_id String
+
+  requirementsAdopted RequirementsAdopted[]
 
   @@map("pets")
 }
@@ -76,14 +72,19 @@ model RequirementsAdopted {
 }
 
 model Org {
-  id            String   @id @default(uuid())
-  responsible   String
+  id            String @id @default(uuid())
+  name          String
   email         String
   cep           String
-  address       String
   whatsapp      String
   password_hash String
-  created_at    DateTime @default(now())
+  street        String
+  number        String
+  neighborhood  String
+  city          String
+  state         String
+
+  created_at DateTime @default(now())
 
   pet Pet[]
 
